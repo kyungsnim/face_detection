@@ -13,12 +13,14 @@ class GalleryView extends StatefulWidget {
       {Key? key,
         required this.title,
         this.text,
+        this.rect,
         required this.onImage,
         required this.onDetectorViewModeChanged})
       : super(key: key);
 
   final String title;
   final String? text;
+  final List<Rect>? rect;
   final Function(InputImage inputImage) onImage;
   final Function()? onDetectorViewModeChanged;
 
@@ -67,7 +69,11 @@ class _GalleryViewState extends State<GalleryView> {
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
-            Image.file(_image!),
+            Image.file(_image!,
+            fit: BoxFit.fitHeight,),
+            CustomPaint(
+              painter: TestCustomPainter(widget.rect!),
+            ),
           ],
         ),
       )
@@ -102,6 +108,18 @@ class _GalleryViewState extends State<GalleryView> {
           child: Text(
               '${_path == null ? '' : 'Image path: $_path'}\n\n${widget.text ?? ''}'),
         ),
+      if (_image != null)
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+              '${widget.rect}'),
+        ),
+      // Padding(
+      //   padding: const EdgeInsets.all(16.0),
+      //   child: CustomPaint(
+      //     painter: TestCustomPainter(widget.rect![0]),
+      //   ),
+      // ),
     ]);
   }
 
@@ -180,6 +198,33 @@ class _GalleryViewState extends State<GalleryView> {
     });
     _path = path;
     final inputImage = InputImage.fromFilePath(path);
+
+    print('>>> inputImage width: ${inputImage.metadata!.size.width}');
+    print('>>> inputImage height: ${inputImage.metadata!.size.height}');
     widget.onImage(inputImage);
   }
+}
+
+class TestCustomPainter extends CustomPainter {
+  List<Rect> rect;
+
+  TestCustomPainter(this.rect);
+
+  Paint _paintRed = Paint()
+    ..color = Colors.red
+    ..isAntiAlias = true;
+  Paint _paintBlue = Paint()
+    ..color = Colors.blue
+    ..isAntiAlias = true;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(rect[0].shift(Offset(-70, 0)), _paintRed);
+    canvas.drawRect(rect[1].shift(Offset(-150, 0)), _paintBlue);
+    // canvas.drawRect(Rect.fromLTRB(250, 60, 380, 200), _paintBlue);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+
 }

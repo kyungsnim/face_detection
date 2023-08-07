@@ -26,6 +26,7 @@ class _FaceDetectionPresenterState extends State<FaceDetectionPresenter> {
   bool _isBusy = false;
   CustomPaint? _customPaint;
   String? _text;
+  List<Rect>? _rect = [];
   var _cameraLensDirection = CameraLensDirection.front;
 
   @override
@@ -40,6 +41,7 @@ class _FaceDetectionPresenterState extends State<FaceDetectionPresenter> {
       title: 'Face Detector',
       customPaint: _customPaint,
       text: _text,
+      rect: _rect,
       onImage: _processImage,
       initialCameraLensDirection: _cameraLensDirection,
       onCameraLensDirectionChanged: (value) => _cameraLensDirection = value,
@@ -47,6 +49,7 @@ class _FaceDetectionPresenterState extends State<FaceDetectionPresenter> {
   }
 
   Future<void> _processImage(InputImage inputImage) async {
+
     if (!_canProcess) return;
     if (_isBusy) return;
     _isBusy = true;
@@ -65,8 +68,10 @@ class _FaceDetectionPresenterState extends State<FaceDetectionPresenter> {
       _customPaint = CustomPaint(painter: painter);
     } else {
       String text = 'Faces found: ${faces.length}\n\n';
+
       for (final face in faces) {
         text += 'face: ${face.boundingBox}\n\n';
+        _rect!.add(face.boundingBox);
       }
       _text = text;
       // TODO: set _customPaint to draw boundingRect on top of image
